@@ -1,28 +1,24 @@
-import express from 'express';
-import cors from 'cors';
-import fetch from 'node-fetch';
-
+const express = require('express');
 const app = express();
-app.use(cors());
+const port = process.env.PORT || 3000;
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxxxx/exec'; // Replace this
-
-app.post('/hook', async (req, res) => {
-  try {
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
-    });
-
-    const result = await response.text();
-    res.status(200).send({ ok: true, result });
-  } catch (err) {
-    res.status(500).send({ ok: false, error: err.message });
-  }
+// Default route to handle GET /
+app.get('/', (req, res) => {
+  res.send('Webhook server is live. Use POST /hook');
 });
 
-app.listen(3000, () => {
-  console.log('Proxy live on port 3000');
+// Webhook receiver route
+app.post('/hook', (req, res) => {
+  console.log("Webhook received:", req.body); // Logs the entire payload
+  res.status(200).send("Webhook received");   // Respond to client
 });
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
+
+
