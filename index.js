@@ -1,37 +1,34 @@
+// index.js
+
 import express from 'express';
+import cors from 'cors';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware to parse JSON payloads
+// Allow all CORS origins (or restrict to Vercel domain if needed)
+app.use(cors()); // OR: app.use(cors({ origin: 'https://form-to-sheet-afe2.vercel.app' }));
 app.use(express.json());
 
-// GET route for sanity check
 app.get('/', (req, res) => {
-  res.send('✅ Proxy server is live. Use POST /hook');
+  res.send('Webhook server running');
 });
 
-// POST webhook route to forward events to Apps Script
-app.post('/hook', async (req, res) => {
-  console.log("📦 Webhook received:", req.body);
+app.post('/hook', (req, res) => {
+  const data = req.body;
+  console.log('Received webhook:', data);
 
-  try {
-    const response = await fetch('https://script.google.com/macros/s/AKfycbwxvKYUcQVKaMWPNIG6P6jJikyODLyoqaWRLS2SlZfJugF7c6FVew58QfwjTY6q6hSrRA/exec', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(req.body)
-    });
+  // Optional: Log field-by-field for debugging
+  Object.entries(data).forEach(([key, value]) => {
+    console.log(`${key}: ${value}`);
+  });
 
-    const result = await response.text();
-    res.status(200).json({ ok: true, result });
-  } catch (err) {
-    console.error("❌ Error forwarding to Apps Script:", err.message);
-    res.status(500).json({ ok: false, error: err.message });
-  }
+  res.status(200).json({ status: 'ok', received: true });
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Proxy running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
 });
+
 
 
