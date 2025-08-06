@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 10000;
 
 // ✅ CORS setup
 app.use(cors({
-  origin: 'https://your-vercel-site.vercel.app', // Replace this with your actual deployed domain
+  origin: 'https://form-to-sheet-afe2.vercel.app/', // Replace this with your actual deployed domain
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
 }));
@@ -52,6 +52,7 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+
 
 
 
