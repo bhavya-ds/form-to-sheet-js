@@ -1,50 +1,44 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import fetch from 'node-fetch'; // still needed
-import cors from 'cors'; // ✅ ADD THIS
+import cors from 'cors';
+import fetch from 'node-fetch';
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ✅ CORS setup
+// ✅ Setup CORS BEFORE all routes
 app.use(cors({
-  origin: 'https://form-to-sheet-afe2.vercel.app', // Replace this with your actual deployed domain
+  origin: 'https://form-to-sheet-afe2.vercel.app',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: ['Content-Type']
 }));
 
 app.use(bodyParser.json());
 
-// ✅ Handle preflight
+// ✅ Handle preflight explicitly
 app.options('/hook', cors());
 
-// Google Sheets Web App endpoint
-const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDd5iost7yDur31BHZ2RoLnYzRg3xuZyZ2JHX9YwlB7fDsu8KfK3soVviPiHO-tue8qQ/exec';
-
-// ✅ Webhook POST
+// ✅ Main route
 app.post('/hook', async (req, res) => {
   const payload = req.body;
   console.log('Received webhook:', payload);
 
   try {
-    const forwardRes = await fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+    const forwardRes = await fetch('https://script.google.com/macros/s/AKfycbyDd5iost7yDur31BHZ2RoLnYzRg3xuZyZ2JHX9YwlB7fDsu8KfK3soVviPiHO-tue8qQ/exec', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
-    if (!forwardRes.ok) {
-      throw new Error(`Google Sheets responded with ${forwardRes.status}`);
-    }
+    if (!forwardRes.ok) throw new Error(`Google Sheets responded with ${forwardRes.status}`);
 
     res.status(200).send('Forwarded to Google Sheets');
-  } catch (error) {
-    console.error('Error forwarding to Google Sheets:', error);
+  } catch (err) {
+    console.error('Forwarding error:', err);
     res.status(500).send('Internal Server Error');
   }
 });
 
-// Home route
 app.get('/', (req, res) => {
   res.send('Webhook server is running.');
 });
@@ -52,8 +46,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
-
-
 
 
 
