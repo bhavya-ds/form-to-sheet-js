@@ -1,18 +1,29 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import fetch from 'node-fetch'; // make sure it's in your package.json
+import fetch from 'node-fetch'; // still needed
+import cors from 'cors'; // ✅ ADD THIS
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// ✅ CORS setup
+app.use(cors({
+  origin: 'https://your-vercel-site.vercel.app', // Replace this with your actual deployed domain
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
+
 app.use(bodyParser.json());
 
-// Replace with your actual deployed Google Apps Script Web App URL
+// ✅ Handle preflight
+app.options('/hook', cors());
+
+// Google Sheets Web App endpoint
 const GOOGLE_SHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyDd5iost7yDur31BHZ2RoLnYzRg3xuZyZ2JHX9YwlB7fDsu8KfK3soVviPiHO-tue8qQ/exec';
 
+// ✅ Webhook POST
 app.post('/hook', async (req, res) => {
   const payload = req.body;
-
   console.log('Received webhook:', payload);
 
   try {
@@ -33,6 +44,7 @@ app.post('/hook', async (req, res) => {
   }
 });
 
+// Home route
 app.get('/', (req, res) => {
   res.send('Webhook server is running.');
 });
@@ -40,7 +52,6 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
-
 
 
 
